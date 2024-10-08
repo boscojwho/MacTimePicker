@@ -53,9 +53,19 @@ struct TimePicker: View {
                             }
                         }
                     }
+                
                 if components.count > 1, component.offset < components.count - 1 {
-                    Text(":")
-                        .font(.title)
+                    Text(
+                        separator(
+                            after: component,
+                            components: components
+                        )
+                    )
+                    .font(.title)
+                }
+                
+                if component.element.rawValue == TimePickerComponents.seconds.rawValue {
+                    let _ = print("seconds")
                 }
             }
         }
@@ -71,6 +81,20 @@ struct TimePicker: View {
                     )
                 )
         )
+    }
+    
+    private func separator(
+        after component: EnumeratedSequence<[TimePickerComponents]>.Element,
+        components: [EnumeratedSequence<[TimePickerComponents]>.Element]
+    ) -> String {
+        let nextComponent = components[component.offset.advanced(by: 1)]
+        let lhs = nextComponent.element.rawValue
+        let rhs = TimePickerComponents.seconds.rawValue
+        if lhs == rhs {
+            return "."
+        } else {
+            return ":"
+        }
     }
 }
 
@@ -100,4 +124,5 @@ struct TimeIntervalPickerStyle: DatePickerStyle {
 
 #Preview {
     TimePicker(displayedComponents: .all)
+        .padding()
 }
