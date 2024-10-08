@@ -43,16 +43,19 @@ struct TimePicker: View {
                 components,
                 id: \.offset
             ) { component in
-                TimeIntervalPicker(isFocused: $focused[component.offset])
-                    .onTapGesture {
-                        for (offset, value) in $focused.enumerated() {
-                            if offset == component.offset {
-                                value.wrappedValue = true
-                            } else {
-                                value.wrappedValue = false
-                            }
+                TimeIntervalPicker(
+                    component: component.element,
+                    isFocused: $focused[component.offset]
+                )
+                .onTapGesture {
+                    for (offset, value) in $focused.enumerated() {
+                        if offset == component.offset {
+                            value.wrappedValue = true
+                        } else {
+                            value.wrappedValue = false
                         }
                     }
+                }
                 
                 if components.count > 1, component.offset < components.count - 1 {
                     Text(

@@ -14,13 +14,27 @@ struct TimeIntervalPicker: View {
         case invalidValue
     }
     
+    let component: TimePickerComponents
+    let intervalRange: ClosedRange<TimeInterval>
     @Binding var isFocused: Bool
-    @State private var input: String = "00"
+    init(
+        component: TimePickerComponents,
+        intervalRange: ClosedRange<TimeInterval> = 0...60,
+        isFocused: Binding<Bool>
+    ) {
+        self.component = component
+        self.intervalRange = intervalRange
+        _isFocused = isFocused
+        _input = .init(wrappedValue: "00")
+        _tempInput = .init(wrappedValue: "00")
+    }
+    
+    @State private var input: String
+    /// Resets to `00` (or equivalent) after timeout period ends.
+    @State private var tempInput: String
+    
     @State private var timer: Timer?
     @State private var resetTimer: Timer?
-    
-    /// Resets to `00` after timeout period ends.
-    @State private var tempInput = "00"
     
 //    @Environment(\.isFocused) var focusState
 
@@ -42,7 +56,7 @@ struct TimeIntervalPicker: View {
                 }
                 
                 let newInput = String((tempInput + keyPress.characters))
-                guard let validInterval = TimeInterval(newInput), (0...60).contains(validInterval) else {
+                guard let validInterval = TimeInterval(newInput), intervalRange.contains(validInterval) else {
                     print("enter timeout because invalid interval")
                     enterTimeoutPeriod()
                     return .handled
@@ -50,9 +64,9 @@ struct TimeIntervalPicker: View {
                 
                 if validInterval == 0 {
                     print("entered 0 or 00")
-                    tempInput = "00"
-                    input = "00"
-                } else if validInterval <= 60 {
+                    tempInput = defaultInput
+                    input = defaultInput
+                } else if validInterval <= intervalRange.upperBound {
                     print("entered \(validInterval)")
                     tempInput = String(newInput.suffix(2))
                     input = String(newInput.suffix(2))
@@ -69,6 +83,10 @@ struct TimeIntervalPicker: View {
                 enterResetCountdown()
                 return .handled
             }
+    }
+    
+    private var defaultInput: String {
+        return "00"
     }
     
     private func enterTimeoutPeriod() {
@@ -89,7 +107,10 @@ struct TimeIntervalPicker: View {
 }
 
 #Preview {
-    TimeIntervalPicker(isFocused: .constant(true))
-        .frame(width: 280, height: 144)
+    TimeIntervalPicker(
+        component: .seconds,
+        isFocused: .constant(true)
+    )
+    .frame(width: 280, height: 144)
 }
 #endif
