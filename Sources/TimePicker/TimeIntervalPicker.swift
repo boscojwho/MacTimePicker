@@ -84,6 +84,10 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.upArrow) {
+                guard isFocused else {
+                    print("ignore .upArrow - not focused for \(component)")
+                    return .ignored
+                }
                 guard let intValue = Int(input) else {
                     print("ignored .upArrow")
                     return .ignored
@@ -96,6 +100,10 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.downArrow) {
+                guard isFocused else {
+                    print("ignore .downArrow - not focused for \(component)")
+                    return .ignored
+                }
                 guard let intValue = Int(input) else {
                     print("ignored .downArrow")
                     return .ignored

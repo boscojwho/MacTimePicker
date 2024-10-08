@@ -66,10 +66,6 @@ struct TimePicker: View {
                     )
                     .font(.title)
                 }
-                
-                if component.element.rawValue == TimePickerComponents.seconds.rawValue {
-                    let _ = print("seconds")
-                }
             }
         }
         .padding(4)
@@ -84,6 +80,46 @@ struct TimePicker: View {
                     )
                 )
         )
+        .focusable(true)
+        .focusEffectDisabled(true)
+        .onKeyPress(.leftArrow) {
+            let focusedIndex = focused.firstIndex { value in value == true }
+            guard let focusedIndex else {
+                /// Focus right-most.
+                print("<- focus right most")
+                focused[focused.endIndex] = true
+                return .ignored
+            }
+            let previous = focusedIndex.advanced(by: -1)
+            guard previous >= focused.startIndex else {
+                return .ignored
+            }
+            print("focus previous \(previous)")
+            for (offset, _) in focused.enumerated() {
+                focused[offset] = false
+            }
+            focused[previous] = true
+            return .handled
+        }
+        .onKeyPress(.rightArrow) {
+            let focusedIndex = focused.firstIndex { value in value == true }
+            guard let focusedIndex else {
+                /// Focus left-most.
+                print("-> focus left most")
+                focused[focused.startIndex] = true
+                return .ignored
+            }
+            let next = focusedIndex.advanced(by: 1)
+            guard next < focused.endIndex else {
+                return .ignored
+            }
+            print("focus next \(next)")
+            for (offset, _) in focused.enumerated() {
+                focused[offset] = false
+            }
+            focused[next] = true
+            return .handled
+        }
     }
     
     private func separator(
