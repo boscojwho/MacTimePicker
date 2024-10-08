@@ -83,6 +83,30 @@ struct TimeIntervalPicker: View {
                 enterResetCountdown()
                 return .handled
             }
+            .onKeyPress(.upArrow) {
+                guard let intValue = Int(input) else {
+                    print("ignored .upArrow")
+                    return .ignored
+                }
+                guard TimeInterval(intValue + 1) <= intervalRange.upperBound else {
+                    print("ignored .upArrow upper bound")
+                    return .ignored
+                }
+                input = String("0\(String(intValue + 1))".suffix(2))
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                guard let intValue = Int(input) else {
+                    print("ignored .downArrow")
+                    return .ignored
+                }
+                guard TimeInterval(intValue - 1) >= intervalRange.lowerBound else {
+                    print("ignored .downArrow lower bound")
+                    return .ignored
+                }
+                input = String("0\(String(intValue - 1))".suffix(2))
+                return .handled
+            }
     }
     
     private var defaultInput: String {
