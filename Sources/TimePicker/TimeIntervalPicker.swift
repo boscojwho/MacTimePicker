@@ -16,7 +16,7 @@ struct TimeIntervalPicker: View {
     
     let component: TimePickerComponents
     let intervalRange: ClosedRange<TimeInterval>
-    @Binding var isFocused: Bool
+//    @Binding var isFocused: Bool
     init(
         component: TimePickerComponents,
         intervalRange: ClosedRange<TimeInterval> = 0...60,
@@ -24,7 +24,7 @@ struct TimeIntervalPicker: View {
     ) {
         self.component = component
         self.intervalRange = intervalRange
-        _isFocused = isFocused
+//        _isFocused = isFocused
         _input = .init(wrappedValue: "00")
         _tempInput = .init(wrappedValue: "00")
     }
@@ -36,6 +36,10 @@ struct TimeIntervalPicker: View {
     @State private var timer: Timer?
     @State private var resetTimer: Timer?
     
+    @FocusedValue(\.timePickerComponent) private var focusedComponent
+    private var isFocused: Bool {
+        focusedComponent == component
+    }
 //    @Environment(\.isFocused) var focusState
 
     var body: some View {
@@ -47,7 +51,7 @@ struct TimeIntervalPicker: View {
                     .clipShape(.rect(cornerRadius: 4))
             }
             .focusable()
-//            .focusEffectDisabled(true)
+            .focusEffectDisabled(true)
             .onKeyPress(characters: .decimalDigits, phases: .up) { keyPress in
                 let isTimedOut = timer?.isValid ?? false
                 guard isTimedOut == false else {

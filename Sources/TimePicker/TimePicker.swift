@@ -7,6 +7,17 @@
 
 import SwiftUI
 
+struct FocusedTimePickerComponent: FocusedValueKey {
+    typealias Value = TimePickerComponents
+}
+
+extension FocusedValues {
+    var timePickerComponent: FocusedTimePickerComponent.Value? {
+        get { self[FocusedTimePickerComponent.self] }
+        set { self[FocusedTimePickerComponent.self] = newValue }
+    }
+}
+
 enum TimePickerComponents: Hashable, CaseIterable {
     case hour, minute, second
     func next() -> Self {
@@ -56,6 +67,7 @@ struct TimePicker: View {
                     isFocused: $focused[component.offset]
                 )
                 .focused($focus, equals: component.element)
+                .focusedValue(\.timePickerComponent, focus)
                 .onTapGesture {
                     for (offset, value) in $focused.enumerated() {
                         if offset == component.offset {
