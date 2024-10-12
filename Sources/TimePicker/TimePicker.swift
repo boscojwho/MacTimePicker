@@ -7,38 +7,46 @@
 
 import SwiftUI
 
-struct TimePickerComponents: OptionSet, CaseIterable {
-    let rawValue: UInt
-    
-    static let hours = TimePickerComponents(rawValue: 1 << 0)
-    static let minutes = TimePickerComponents(rawValue: 1 << 1)
-    static let seconds = TimePickerComponents(rawValue: 1 << 2)
-    
-    static let all: TimePickerComponents = [.hours, .minutes, .seconds]
-    static var allCases: [TimePickerComponents] = [.hours, .minutes, .seconds]
-    
-    func array() -> [Self] {
-        TimePickerComponents
-            .allCases
-            .filter { $0.rawValue & self.rawValue != 0 }
+enum TimePickerComponents: Hashable, CaseIterable {
+    case hour, minute, second
+    func next() -> Self {
+        switch self {
+        case .hour:
+            return .minute
+        case .minute:
+            return .second
+        case .second:
+            return .hour
+        }
+    }
+    func previous() -> Self {
+        switch self {
+        case .hour:
+            return .second
+        case .minute:
+            return .hour
+        case .second:
+            return .minute
+        }
     }
 }
 
 struct TimePicker: View {
-    let displayedComponents: TimePickerComponents
-    init(displayedComponents: TimePickerComponents) {
+    let displayedComponents: [TimePickerComponents]
+    init(displayedComponents: [TimePickerComponents]) {
         self.displayedComponents = displayedComponents
         _focused = .init(wrappedValue: .init(
             repeating: false,
-            count: displayedComponents.array().count
+            count: displayedComponents.count
         ))
     }
     
     @State private var focused: [Bool]
+    @FocusState private var focus: TimePickerComponents?
     
     var body: some View {
         HStack(spacing: 2) {
-            let components = Array(displayedComponents.array().enumerated())
+            let components = Array(displayedComponents.enumerated())
             ForEach(
                 components,
                 id: \.offset
@@ -47,6 +55,7 @@ struct TimePicker: View {
                     component: component.element,
                     isFocused: $focused[component.offset]
                 )
+                .focused($focus, equals: component.element)
                 .onTapGesture {
                     for (offset, value) in $focused.enumerated() {
                         if offset == component.offset {
@@ -57,12 +66,9 @@ struct TimePicker: View {
                     }
                 }
                 
-                if components.count > 1, component.offset < components.count - 1 {
+                if component.offset < (components.count - 1) {
                     Text(
-                        separator(
-                            after: component,
-                            components: components
-                        )
+                        ":"
                     )
                     .font(.title)
                 }
@@ -80,60 +86,72 @@ struct TimePicker: View {
                     )
                 )
         )
-        .focusable(true)
-        .focusEffectDisabled(true)
-        .onKeyPress(.leftArrow) {
-            let focusedIndex = focused.firstIndex { value in value == true }
-            guard let focusedIndex else {
-                /// Focus right-most.
-                print("<- focus right most")
-                focused[focused.endIndex] = true
-                return .ignored
+        .onMoveCommand { direction in
+            guard let focus else {
+                print("No focus")
+                return
             }
-            let previous = focusedIndex.advanced(by: -1)
-            guard previous >= focused.startIndex else {
-                return .ignored
+            switch direction {
+            case .left:
+                print("Left: \(focus) -> \(focus.previous())")
+                self.focus = focus.previous()
+                print("\(self.focus)")
+            case .right:
+                print("Right: \(focus) -> \(focus.next())")
+                self.focus = focus.next()
+                print("\(self.focus)")
+            default:
+                print("Unsupported arrow direction")
+                return
             }
-            print("focus previous \(previous)")
-            for (offset, _) in focused.enumerated() {
-                focused[offset] = false
-            }
-            focused[previous] = true
-            return .handled
         }
-        .onKeyPress(.rightArrow) {
-            let focusedIndex = focused.firstIndex { value in value == true }
-            guard let focusedIndex else {
-                /// Focus left-most.
-                print("-> focus left most")
-                focused[focused.startIndex] = true
-                return .ignored
-            }
-            let next = focusedIndex.advanced(by: 1)
-            guard next < focused.endIndex else {
-                return .ignored
-            }
-            print("focus next \(next)")
-            for (offset, _) in focused.enumerated() {
-                focused[offset] = false
-            }
-            focused[next] = true
-            return .handled
-        }
+//        .focusable(true)
+//        .focusEffectDisabled(true)
+//        .onKeyPress(.leftArrow) {
+//            let focusedIndex = focused.firstIndex { value in value == true }
+//            guard let focusedIndex else {
+//                /// Focus right-most.
+//                print("<- focus right most")
+//                focused[focused.endIndex] = true
+//                return .ignored
+//            }
+//            let previous = focusedIndex.advanced(by: -1)
+//            guard previous >= focused.startIndex else {
+//                return .ignored
+//            }
+//            print("focus previous \(previous)")
+//            for (offset, _) in focused.enumerated() {
+//                focused[offset] = false
+//            }
+//            focused[previous] = true
+//            return .handled
+//        }
+//        .onKeyPress(.rightArrow) {
+//            let focusedIndex = focused.firstIndex { value in value == true }
+//            guard let focusedIndex else {
+//                /// Focus left-most.
+//                print("-> focus left most")
+//                focused[focused.startIndex] = true
+//                return .ignored
+//            }
+//            let next = focusedIndex.advanced(by: 1)
+//            guard next < focused.endIndex else {
+//                return .ignored
+//            }
+//            print("focus next \(next)")
+//            for (offset, _) in focused.enumerated() {
+//                focused[offset] = false
+//            }
+//            focused[next] = true
+//            return .handled
+//        }
     }
     
     private func separator(
-        after component: EnumeratedSequence<[TimePickerComponents]>.Element,
-        components: [EnumeratedSequence<[TimePickerComponents]>.Element]
+        after component: TimePickerComponents,
+        components: [TimePickerComponents]
     ) -> String {
-        let nextComponent = components[component.offset.advanced(by: 1)]
-        let lhs = nextComponent.element.rawValue
-        let rhs = TimePickerComponents.seconds.rawValue
-        if lhs == rhs {
-            return "."
-        } else {
-            return ":"
-        }
+        return ":"
     }
 }
 
@@ -150,7 +168,7 @@ extension DatePickerStyle where Self == TimeIntervalPickerStyle {
 struct TimeIntervalPickerStyle: DatePickerStyle {
     func makeBody(configuration: Configuration) -> some View {
 #if os(macOS)
-        TimePicker(displayedComponents: .all)
+        TimePicker(displayedComponents: TimePickerComponents.allCases)
 #else
         DatePicker(
             selection: configuration.selection,
@@ -162,6 +180,6 @@ struct TimeIntervalPickerStyle: DatePickerStyle {
 }
 
 #Preview {
-    TimePicker(displayedComponents: .all)
+    TimePicker(displayedComponents: TimePickerComponents.allCases)
         .padding()
 }

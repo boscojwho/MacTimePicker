@@ -46,8 +46,8 @@ struct TimeIntervalPicker: View {
                     .background(isFocused ? .orange : .clear)
                     .clipShape(.rect(cornerRadius: 4))
             }
-            .focusable(true)
-            .focusEffectDisabled(true)
+            .focusable()
+//            .focusEffectDisabled(true)
             .onKeyPress(characters: .decimalDigits, phases: .up) { keyPress in
                 let isTimedOut = timer?.isValid ?? false
                 guard isTimedOut == false else {
@@ -84,10 +84,10 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.upArrow) {
-                guard isFocused else {
-                    print("ignore .upArrow - not focused for \(component)")
-                    return .ignored
-                }
+//                guard isFocused else {
+//                    print("ignore .upArrow - not focused for \(component)")
+//                    return .ignored
+//                }
                 guard let intValue = Int(input) else {
                     print("ignored .upArrow")
                     return .ignored
@@ -100,10 +100,10 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.downArrow) {
-                guard isFocused else {
-                    print("ignore .downArrow - not focused for \(component)")
-                    return .ignored
-                }
+//                guard isFocused else {
+//                    print("ignore .downArrow - not focused for \(component)")
+//                    return .ignored
+//                }
                 guard let intValue = Int(input) else {
                     print("ignored .downArrow")
                     return .ignored
@@ -140,7 +140,7 @@ struct TimeIntervalPicker: View {
 
 #Preview {
     TimeIntervalPicker(
-        component: .seconds,
+        component: .second,
         isFocused: .constant(true)
     )
     .frame(width: 280, height: 144)
