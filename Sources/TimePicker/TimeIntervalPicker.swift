@@ -18,8 +18,7 @@ struct TimeIntervalPicker: View {
     let intervalRange: ClosedRange<TimeInterval>
     init(
         component: TimePickerComponents,
-        intervalRange: ClosedRange<TimeInterval> = 0...60,
-        isFocused: Binding<Bool>
+        intervalRange: ClosedRange<TimeInterval> = 0...60
     ) {
         self.component = component
         self.intervalRange = intervalRange
@@ -133,8 +132,7 @@ struct TimeIntervalPicker: View {
 
 #Preview {
     TimeIntervalPicker(
-        component: .second,
-        isFocused: .constant(true)
+        component: .second
     )
     .frame(width: 280, height: 144)
 }

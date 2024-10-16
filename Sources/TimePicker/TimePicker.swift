@@ -46,13 +46,8 @@ public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
     public init(displayedComponents: [TimePickerComponents]) {
         self.displayedComponents = displayedComponents
-        _focused = .init(wrappedValue: .init(
-            repeating: false,
-            count: displayedComponents.count
-        ))
     }
     
-    @State private var focused: [Bool]
     @FocusState private var focus: TimePickerComponents?
     
     public var body: some View {
@@ -63,20 +58,10 @@ public struct TimePicker: View {
                 id: \.offset
             ) { component in
                 TimeIntervalPicker(
-                    component: component.element,
-                    isFocused: $focused[component.offset]
+                    component: component.element
                 )
                 .focused($focus, equals: component.element)
                 .focusedValue(\.timePickerComponent, focus)
-                .onTapGesture {
-                    for (offset, value) in $focused.enumerated() {
-                        if offset == component.offset {
-                            value.wrappedValue = true
-                        } else {
-                            value.wrappedValue = false
-                        }
-                    }
-                }
                 
                 if component.offset < (components.count - 1) {
                     let separator = separator(
