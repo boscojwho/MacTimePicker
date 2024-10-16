@@ -16,7 +16,6 @@ struct TimeIntervalPicker: View {
     
     let component: TimePickerComponents
     let intervalRange: ClosedRange<TimeInterval>
-//    @Binding var isFocused: Bool
     init(
         component: TimePickerComponents,
         intervalRange: ClosedRange<TimeInterval> = 0...60,
@@ -24,7 +23,6 @@ struct TimeIntervalPicker: View {
     ) {
         self.component = component
         self.intervalRange = intervalRange
-//        _isFocused = isFocused
         _input = .init(wrappedValue: "00")
         _tempInput = .init(wrappedValue: "00")
     }
@@ -40,7 +38,6 @@ struct TimeIntervalPicker: View {
     private var isFocused: Bool {
         focusedComponent == component
     }
-//    @Environment(\.isFocused) var focusState
 
     var body: some View {
         Text("\(input)")
@@ -88,10 +85,6 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.upArrow) {
-//                guard isFocused else {
-//                    print("ignore .upArrow - not focused for \(component)")
-//                    return .ignored
-//                }
                 guard let intValue = Int(input) else {
                     print("ignored .upArrow")
                     return .ignored
@@ -104,10 +97,6 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.downArrow) {
-//                guard isFocused else {
-//                    print("ignore .downArrow - not focused for \(component)")
-//                    return .ignored
-//                }
                 guard let intValue = Int(input) else {
                     print("ignored .downArrow")
                     return .ignored
