@@ -18,7 +18,7 @@ extension FocusedValues {
     }
 }
 
-enum TimePickerComponents: Hashable, CaseIterable {
+public enum TimePickerComponents: Hashable, CaseIterable {
     case hour, minute, second
     func next() -> Self {
         switch self {
@@ -42,7 +42,7 @@ enum TimePickerComponents: Hashable, CaseIterable {
     }
 }
 
-struct TimePicker: View {
+public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
     init(displayedComponents: [TimePickerComponents]) {
         self.displayedComponents = displayedComponents
@@ -55,7 +55,7 @@ struct TimePicker: View {
     @State private var focused: [Bool]
     @FocusState private var focus: TimePickerComponents?
     
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 2) {
             let components = Array(displayedComponents.enumerated())
             ForEach(
