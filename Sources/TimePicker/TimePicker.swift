@@ -79,10 +79,12 @@ struct TimePicker: View {
                 }
                 
                 if component.offset < (components.count - 1) {
-                    Text(
-                        ":"
+                    let separator = separator(
+                        after: component.element,
+                        components: components.map { $0.element }
                     )
-                    .font(.title)
+                    Text(verbatim: separator)
+                        .font(.title)
                 }
             }
         }
@@ -107,11 +109,11 @@ struct TimePicker: View {
             case .left:
                 print("Left: \(focus) -> \(focus.previous())")
                 self.focus = focus.previous()
-                print("\(self.focus)")
+                print("\(String(describing: self.focus))")
             case .right:
                 print("Right: \(focus) -> \(focus.next())")
                 self.focus = focus.next()
-                print("\(self.focus)")
+                print("\(String(describing: self.focus))")
             default:
                 print("Unsupported arrow direction")
                 return
@@ -123,6 +125,16 @@ struct TimePicker: View {
         after component: TimePickerComponents,
         components: [TimePickerComponents]
     ) -> String {
+        guard components.count > 1 else {
+            return ""
+        }
+        guard let index = components.firstIndex(of: component) else {
+            return ""
+        }
+        let nextIndex = components.index(after: index)
+        if components[nextIndex] == .second {
+            return "."
+        }
         return ":"
     }
 }
