@@ -40,15 +40,33 @@ public enum TimePickerComponents: Hashable, CaseIterable {
             return .minute
         }
     }
+    func dateComponents() -> DateComponents {
+        .init(
+            hour: self == .hour ? 0 : nil,
+            minute: self == .minute ? 0 : nil,
+            second: self == .second ? 0 : nil
+        )
+    }
 }
 
 public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
-    public init(displayedComponents: [TimePickerComponents]) {
+    @Binding var selection: Date
+    @State private var dateComponents: [DateComponents]
+    public init(
+        selection: Binding<Date>,
+        displayedComponents: [TimePickerComponents]
+    ) {
+        _selection = selection
         self.displayedComponents = displayedComponents
+        _dateComponents = .init(wrappedValue: displayedComponents.map {
+            $0.dateComponents()
+        })
     }
     
     @FocusState private var focus: TimePickerComponents?
+    
+    @State private var components: [TimePickerComponents: DateComponents] = [:]
     
     public var body: some View {
         HStack(spacing: 2) {
@@ -57,11 +75,18 @@ public struct TimePicker: View {
                 components,
                 id: \.offset
             ) { component in
+                let element: TimePickerComponents = component.element
+                let offset: Int = component.offset
                 TimeIntervalPicker(
-                    component: component.element
+                    component: element,
+                    selection: $dateComponents[offset]
                 )
                 .focused($focus, equals: component.element)
                 .focusedValue(\.timePickerComponent, focus)
+//                .onChange(of: $dateComponents[offset].wrappedValue) { _, newValue in
+//                    let value: DateComponents = newValue
+//                    components[element] = value
+//                }
                 
                 if component.offset < (components.count - 1) {
                     let separator = separator(
@@ -104,6 +129,16 @@ public struct TimePicker: View {
                 return
             }
         }
+        #if DEBUG
+        .onChange(of: dateComponents) { oldValue, newValue in
+            print("old -> \(oldValue)")
+            print("new -> \(newValue)")
+//            let hasHour = displayedComponents.contains { $0 == .hour }
+//            let hasMinute = displayedComponents.containts { $0 == .minute }
+//            let hasSecond = displayedComponents.containts { $0 == .second }
+//            let mergedComponents = DateComponents(hour: hasHour ? newValue, minute: <#T##Int?#>, second: <#T##Int?#>)
+        }
+        #endif
     }
     
     private func separator(
@@ -137,7 +172,10 @@ public extension DatePickerStyle where Self == TimeIntervalPickerStyle {
 public struct TimeIntervalPickerStyle: DatePickerStyle {
     public func makeBody(configuration: Configuration) -> some View {
 #if os(macOS)
-        TimePicker(displayedComponents: TimePickerComponents.allCases)
+        TimePicker(
+            selection: configuration.$selection,
+            displayedComponents: TimePickerComponents.allCases
+        )
 #else
         DatePicker(
             selection: configuration.selection,
@@ -149,6 +187,9 @@ public struct TimeIntervalPickerStyle: DatePickerStyle {
 }
 
 #Preview {
-    TimePicker(displayedComponents: TimePickerComponents.allCases)
-        .padding()
+    TimePicker(
+        selection: .constant(.now),
+        displayedComponents: TimePickerComponents.allCases
+    )
+    .padding()
 }

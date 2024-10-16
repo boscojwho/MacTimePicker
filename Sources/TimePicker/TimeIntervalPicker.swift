@@ -16,21 +16,17 @@ struct TimeIntervalPicker: View {
     
     let component: TimePickerComponents
     let intervalRange: ClosedRange<TimeInterval>
+    @Binding var dateComponents: DateComponents
     init(
         component: TimePickerComponents,
-        intervalRange: ClosedRange<TimeInterval> = 0...60
+        intervalRange: ClosedRange<TimeInterval> = 0...60,
+        selection: Binding<DateComponents>
     ) {
         self.component = component
         self.intervalRange = intervalRange
         _input = .init(wrappedValue: "00")
         _tempInput = .init(wrappedValue: "00")
-        _dateComponents = .init(
-            wrappedValue: .init(
-                hour: component == .hour ? 0 : nil,
-                minute: component == .minute ? 0 : nil,
-                second: component == .second ? 0 : nil
-            )
-        )
+        _dateComponents = selection
     }
     
     @State private var input: String
@@ -39,8 +35,6 @@ struct TimeIntervalPicker: View {
     
     @State private var timer: Timer?
     @State private var resetTimer: Timer?
-    
-    @State private var dateComponents: DateComponents
     
     @FocusedValue(\.timePickerComponent) private var focusedComponent
     private var isFocused: Bool {
@@ -156,7 +150,8 @@ struct TimeIntervalPicker: View {
 
 #Preview {
     TimeIntervalPicker(
-        component: .second
+        component: .second,
+        selection: .constant(.init(second: 0))
     )
     .frame(width: 280, height: 144)
 }
