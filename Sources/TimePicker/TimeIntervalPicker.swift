@@ -24,6 +24,13 @@ struct TimeIntervalPicker: View {
         self.intervalRange = intervalRange
         _input = .init(wrappedValue: "00")
         _tempInput = .init(wrappedValue: "00")
+        _dateComponents = .init(
+            wrappedValue: .init(
+                hour: component == .hour ? 0 : nil,
+                minute: component == .minute ? 0 : nil,
+                second: component == .second ? 0 : nil
+            )
+        )
     }
     
     @State private var input: String
@@ -32,6 +39,8 @@ struct TimeIntervalPicker: View {
     
     @State private var timer: Timer?
     @State private var resetTimer: Timer?
+    
+    @State private var dateComponents: DateComponents
     
     @FocusedValue(\.timePickerComponent) private var focusedComponent
     private var isFocused: Bool {
@@ -107,6 +116,21 @@ struct TimeIntervalPicker: View {
                 input = String("0\(String(intValue - 1))".suffix(2))
                 return .handled
             }
+            .onChange(of: input) { _, newValue in
+                guard let intValue = Int(input) else {
+                    fatalError()
+                }
+                setDateComponents(with: intValue)
+            }
+    }
+    
+    private func setDateComponents(with value: Int) {
+        dateComponents = .init(
+            hour: component == .hour ? value : nil,
+            minute: component == .minute ? value : nil,
+            second: component == .second ? value : nil
+        )
+        print("\(component) -> ", dateComponents)
     }
     
     private var defaultInput: String {
