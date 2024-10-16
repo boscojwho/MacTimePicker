@@ -44,7 +44,7 @@ public enum TimePickerComponents: Hashable, CaseIterable {
 
 public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
-    init(displayedComponents: [TimePickerComponents]) {
+    public init(displayedComponents: [TimePickerComponents]) {
         self.displayedComponents = displayedComponents
         _focused = .init(wrappedValue: .init(
             repeating: false,
