@@ -144,13 +144,13 @@ public struct TimePicker: View {
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 @available(visionOS, unavailable)
-extension DatePickerStyle where Self == TimeIntervalPickerStyle {
+public extension DatePickerStyle where Self == TimeIntervalPickerStyle {
     
     static var timeIntervalField: TimeIntervalPickerStyle { .init() }
 }
 
-struct TimeIntervalPickerStyle: DatePickerStyle {
-    func makeBody(configuration: Configuration) -> some View {
+public struct TimeIntervalPickerStyle: DatePickerStyle {
+    public func makeBody(configuration: Configuration) -> some View {
 #if os(macOS)
         TimePicker(displayedComponents: TimePickerComponents.allCases)
 #else
