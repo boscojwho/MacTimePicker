@@ -53,6 +53,7 @@ public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
     @Binding var selection: Date
     @State private var dateComponents: [DateComponents]
+    @State private var components: [TimePickerComponents: DateComponents]
     public init(
         selection: Binding<Date>,
         displayedComponents: [TimePickerComponents]
@@ -62,11 +63,16 @@ public struct TimePicker: View {
         _dateComponents = .init(wrappedValue: displayedComponents.map {
             $0.dateComponents()
         })
+        var comps: [TimePickerComponents: DateComponents] = [:]
+        for comp in displayedComponents {
+            comps[comp] = comp.dateComponents()
+        }
+        _components = .init(wrappedValue: comps)
     }
     
     @FocusState private var focus: TimePickerComponents?
-    
-    @State private var components: [TimePickerComponents: DateComponents] = [:]
+        
+    let baselineDate = Date.now
     
     public var body: some View {
         HStack(spacing: 2) {
@@ -83,10 +89,6 @@ public struct TimePicker: View {
                 )
                 .focused($focus, equals: component.element)
                 .focusedValue(\.timePickerComponent, focus)
-//                .onChange(of: $dateComponents[offset].wrappedValue) { _, newValue in
-//                    let value: DateComponents = newValue
-//                    components[element] = value
-//                }
                 
                 if component.offset < (components.count - 1) {
                     let separator = separator(
@@ -133,10 +135,24 @@ public struct TimePicker: View {
         .onChange(of: dateComponents) { oldValue, newValue in
             print("old -> \(oldValue)")
             print("new -> \(newValue)")
-//            let hasHour = displayedComponents.contains { $0 == .hour }
-//            let hasMinute = displayedComponents.containts { $0 == .minute }
-//            let hasSecond = displayedComponents.containts { $0 == .second }
-//            let mergedComponents = DateComponents(hour: hasHour ? newValue, minute: <#T##Int?#>, second: <#T##Int?#>)
+            let calendar = Calendar.autoupdatingCurrent
+            var comps = DateComponents()
+            for comp in newValue {
+                comps.hour = comp.hour ?? comps.hour
+                comps.minute = comp.minute ?? comps.minute
+                comps.second = comp.second ?? comps.second
+            }
+            print("merged -> \(comps)")
+            
+            let date = calendar.date(
+                byAdding: comps,
+                to: baselineDate,
+                wrappingComponents: false)
+            selection = date ?? baselineDate
+            
+            print(baselineDate)
+            print(date)
+            print(date?.timeIntervalSince(baselineDate))
         }
         #endif
     }
