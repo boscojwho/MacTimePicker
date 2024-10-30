@@ -52,13 +52,21 @@ public enum TimePickerComponents: Hashable, CaseIterable {
 public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
     @Binding var selection: Date
+    @Binding var interval: TimeInterval
     @State private var dateComponents: [DateComponents]
     @State private var components: [TimePickerComponents: DateComponents]
     public init(
         selection: Binding<Date>,
+        interval: Binding<TimeInterval>? = nil,
         displayedComponents: [TimePickerComponents]
     ) {
         _selection = selection
+        _interval = interval ?? .init(get: {
+            return -1
+        }, set: { _ in
+            // no-op
+            return
+        })
         self.displayedComponents = displayedComponents
         _dateComponents = .init(wrappedValue: displayedComponents.map {
             $0.dateComponents()
@@ -69,6 +77,8 @@ public struct TimePicker: View {
         }
         _components = .init(wrappedValue: comps)
     }
+    
+    @State private var pickedInterval: TimeInterval = 0
     
     @FocusState private var focus: TimePickerComponents?
         
@@ -131,10 +141,7 @@ public struct TimePicker: View {
                 return
             }
         }
-        #if DEBUG
         .onChange(of: dateComponents) { oldValue, newValue in
-            print("old -> \(oldValue)")
-            print("new -> \(newValue)")
             let calendar = Calendar.autoupdatingCurrent
             var comps = DateComponents()
             for comp in newValue {
@@ -142,19 +149,25 @@ public struct TimePicker: View {
                 comps.minute = comp.minute ?? comps.minute
                 comps.second = comp.second ?? comps.second
             }
-            print("merged -> \(comps)")
-            
             let date = calendar.date(
                 byAdding: comps,
                 to: baselineDate,
                 wrappingComponents: false)
             selection = date ?? baselineDate
+            pickedInterval = date?.timeIntervalSince(baselineDate) ?? 0
             
-            print(baselineDate)
-            print(date)
-            print(date?.timeIntervalSince(baselineDate))
+            #if DEBUG
+//            print("old -> \(oldValue)")
+//            print("new -> \(newValue)")
+//            print("merged -> \(comps)")
+//            print(baselineDate)
+//            print(date)
+//            print(date?.timeIntervalSince(baselineDate))
+            #endif
         }
-        #endif
+        .onChange(of: pickedInterval) { oldValue, newValue in
+            print("pickedInterval: \(oldValue) -> \(newValue)")
+        }
     }
     
     private func separator(
@@ -182,14 +195,27 @@ public struct TimePicker: View {
 @available(visionOS, unavailable)
 public extension DatePickerStyle where Self == TimeIntervalPickerStyle {
     
-    static var timeIntervalField: TimeIntervalPickerStyle { .init() }
+    static func timeIntervalField(
+        _ interval: Binding<TimeInterval>? = nil
+    ) -> TimeIntervalPickerStyle {
+        .init(interval: interval)
+    }
 }
 
 public struct TimeIntervalPickerStyle: DatePickerStyle {
+    @Binding var interval: TimeInterval
+    public init(interval: Binding<TimeInterval>? = nil) {
+        _interval = interval ?? .init(get: {
+            return 0
+        }, set: { _ in
+            return
+        })
+    }
     public func makeBody(configuration: Configuration) -> some View {
 #if os(macOS)
         TimePicker(
             selection: configuration.$selection,
+            interval: $interval,
             displayedComponents: TimePickerComponents.allCases
         )
 #else
