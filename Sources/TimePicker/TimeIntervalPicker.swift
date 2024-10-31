@@ -97,28 +97,10 @@ struct TimeIntervalPicker: View {
                 return .handled
             }
             .onKeyPress(.upArrow) {
-                guard let intValue = Int(input) else {
-                    print("ignored .upArrow")
-                    return .ignored
-                }
-                guard TimeInterval(intValue + 1) <= intervalRange.upperBound else {
-                    print("ignored .upArrow upper bound")
-                    return .ignored
-                }
-                input = String("0\(String(intValue + 1))".suffix(Constants.maxDigits))
-                return .handled
+                return increment()
             }
             .onKeyPress(.downArrow) {
-                guard let intValue = Int(input) else {
-                    print("ignored .downArrow")
-                    return .ignored
-                }
-                guard TimeInterval(intValue - 1) >= intervalRange.lowerBound else {
-                    print("ignored .downArrow lower bound")
-                    return .ignored
-                }
-                input = String("0\(String(intValue - 1))".suffix(2))
-                return .handled
+                return decrement()
             }
             .onChange(of: input) { _, newValue in
                 guard let intValue = Int(input) else {
@@ -127,6 +109,46 @@ struct TimeIntervalPicker: View {
                 }
                 setDateComponents(with: intValue)
             }
+            .accessibilityLabel("\(component.description): \(input)")
+            .accessibilityValue("\(input)")
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment:
+                    increment()
+                case .decrement:
+                    decrement()
+                @unknown default:
+                    break
+                }
+            }
+    }
+    
+    @discardableResult
+    private func increment() -> KeyPress.Result {
+        guard let intValue = Int(input) else {
+            print("ignored .upArrow")
+            return .ignored
+        }
+        guard TimeInterval(intValue + 1) <= intervalRange.upperBound else {
+            print("ignored .upArrow upper bound")
+            return .ignored
+        }
+        input = String("0\(String(intValue + 1))".suffix(Constants.maxDigits))
+        return .handled
+    }
+    
+    @discardableResult
+    private func decrement() -> KeyPress.Result {
+        guard let intValue = Int(input) else {
+            print("ignored .downArrow")
+            return .ignored
+        }
+        guard TimeInterval(intValue - 1) >= intervalRange.lowerBound else {
+            print("ignored .downArrow lower bound")
+            return .ignored
+        }
+        input = String("0\(String(intValue - 1))".suffix(2))
+        return .handled
     }
     
     private func setDateComponents(with value: Int) {

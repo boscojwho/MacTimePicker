@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TimePickerComponents: Hashable, CaseIterable {
+public enum TimePickerComponents: Hashable, CaseIterable, CustomStringConvertible {
     case hour, minute, second
     func next() -> Self {
         switch self {
@@ -35,5 +35,16 @@ public enum TimePickerComponents: Hashable, CaseIterable {
             minute: self == .minute ? 0 : nil,
             second: self == .second ? 0 : nil
         )
+    }
+    
+    public var description: String {
+        switch self {
+        case .hour:
+            return "hour"
+        case .minute:
+            return "minute"
+        case .second:
+            return "second"
+        }
     }
 }
