@@ -7,48 +7,6 @@
 
 import SwiftUI
 
-struct FocusedTimePickerComponent: FocusedValueKey {
-    typealias Value = TimePickerComponents
-}
-
-extension FocusedValues {
-    var timePickerComponent: FocusedTimePickerComponent.Value? {
-        get { self[FocusedTimePickerComponent.self] }
-        set { self[FocusedTimePickerComponent.self] = newValue }
-    }
-}
-
-public enum TimePickerComponents: Hashable, CaseIterable {
-    case hour, minute, second
-    func next() -> Self {
-        switch self {
-        case .hour:
-            return .minute
-        case .minute:
-            return .second
-        case .second:
-            return .hour
-        }
-    }
-    func previous() -> Self {
-        switch self {
-        case .hour:
-            return .second
-        case .minute:
-            return .hour
-        case .second:
-            return .minute
-        }
-    }
-    func dateComponents() -> DateComponents {
-        .init(
-            hour: self == .hour ? 0 : nil,
-            minute: self == .minute ? 0 : nil,
-            second: self == .second ? 0 : nil
-        )
-    }
-}
-
 public struct TimePicker: View {
     let displayedComponents: [TimePickerComponents]
     @Binding var selection: Date
