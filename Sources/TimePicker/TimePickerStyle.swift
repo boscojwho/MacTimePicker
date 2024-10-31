@@ -12,16 +12,16 @@ import SwiftUI
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 @available(visionOS, unavailable)
-public extension DatePickerStyle where Self == TimeIntervalPickerStyle {
+public extension DatePickerStyle where Self == TimePickerStyle {
     
     static func timeIntervalField(
         _ interval: Binding<TimeInterval>? = nil
-    ) -> TimeIntervalPickerStyle {
+    ) -> TimePickerStyle {
         .init(interval: interval)
     }
 }
 
-public struct TimeIntervalPickerStyle: DatePickerStyle {
+public struct TimePickerStyle: DatePickerStyle {
     @Binding var interval: TimeInterval
     public init(interval: Binding<TimeInterval>? = nil) {
         _interval = interval ?? .init(get: {
