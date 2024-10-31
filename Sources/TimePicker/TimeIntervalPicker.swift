@@ -47,7 +47,7 @@ struct TimeIntervalPicker: View {
     var body: some View {
         Text("\(input)")
             .font(.largeTitle)
-            .animation(.default.speed(2)) { view in
+            .animation(.none) { view in
                 view.padding(2)
                     .background(isFocused ? .orange : .clear)
                     .clipShape(.rect(cornerRadius: 4))
