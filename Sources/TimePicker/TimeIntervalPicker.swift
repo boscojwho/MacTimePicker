@@ -43,6 +43,12 @@ struct TimeIntervalPicker: View {
         guard selected else { return false }
         return focusedComponent == component
     }
+    
+    private enum Constants {
+        static let defaultValue = "00"
+        static let timeoutDuration: TimeInterval = 1.0
+        static let maxDigits = 2
+    }
 
     var body: some View {
         Text("\(input)")
@@ -71,12 +77,12 @@ struct TimeIntervalPicker: View {
                 
                 if validInterval == 0 {
                     print("entered 0 or 00")
-                    tempInput = defaultInput
-                    input = defaultInput
+                    tempInput = Constants.defaultValue
+                    input = Constants.defaultValue
                 } else if validInterval <= intervalRange.upperBound {
                     print("entered \(validInterval)")
-                    tempInput = String(newInput.suffix(2))
-                    input = String(newInput.suffix(2))
+                    tempInput = String(newInput.suffix(Constants.maxDigits))
+                    input = String(newInput.suffix(Constants.maxDigits))
                 } else {
                     assertionFailure()
                 }
@@ -99,7 +105,7 @@ struct TimeIntervalPicker: View {
                     print("ignored .upArrow upper bound")
                     return .ignored
                 }
-                input = String("0\(String(intValue + 1))".suffix(2))
+                input = String("0\(String(intValue + 1))".suffix(Constants.maxDigits))
                 return .handled
             }
             .onKeyPress(.downArrow) {
@@ -116,6 +122,7 @@ struct TimeIntervalPicker: View {
             }
             .onChange(of: input) { _, newValue in
                 guard let intValue = Int(input) else {
+                    input = Constants.defaultValue
                     fatalError()
                 }
                 setDateComponents(with: intValue)
@@ -131,22 +138,18 @@ struct TimeIntervalPicker: View {
         print("\(component) -> ", dateComponents)
     }
     
-    private var defaultInput: String {
-        return "00"
-    }
-    
     private func enterTimeoutPeriod() {
-        timer = .scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+        timer = .scheduledTimer(withTimeInterval: Constants.timeoutDuration, repeats: false) { _ in
             print("timeout ended")
-            tempInput = "00"
+            tempInput = Constants.defaultValue
             timer = nil
         }
     }
     
     private func enterResetCountdown() {
-        resetTimer = .scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+        resetTimer = .scheduledTimer(withTimeInterval: Constants.timeoutDuration, repeats: false) { _ in
             print("reset triggered")
-            tempInput = "00"
+            tempInput = Constants.defaultValue
             resetTimer = nil
         }
     }
